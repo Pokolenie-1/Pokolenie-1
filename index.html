@@ -133,20 +133,23 @@
                 const dates = [];
                 let numDays = 0;
 
-                for (let i = 2; i < json[0].length; i += 3) {
+                // Проверяем, пустая ли ячейка json[0][1]
+                let startColIndex = json[0][1] ? 2 : 3; // Если json[0][1] пустое, начинаем с 3-го столбца
+                let nameColIndex = json[0][1] ? 1 : 2; // Имя сотрудника в 2-м или 3-м столбце
+
+                for (let i = startColIndex; i < json[0].length; i += 3) {
                     const cellValue = json[0][i];
 
                     let dayNum = -1;
                     if (typeof cellValue === 'number') {
                         dayNum = Math.floor(cellValue);
                     } else if (typeof cellValue === 'string') {
-                        // Ищем число в строке
                         const numMatch = cellValue.match(/\d+/);
                         if (numMatch) dayNum = parseInt(numMatch[0]);
                     }
 
                     if (dayNum < 1 || dayNum > 31) {
-                        const nextCellValue = json[0][i+1] || '';
+                        const nextCellValue = json[0][i + 1] || '';
                         if (typeof nextCellValue === 'number' && nextCellValue >= 1 && nextCellValue <= 31) {
                             dayNum = nextCellValue;
                         } else if (typeof nextCellValue === 'string') {
@@ -171,20 +174,20 @@
                 let employee = null;
                 for (let i = 4; i < json.length; i++) {
                     const row = json[i];
-                    if (!row || !row[1]) continue;
+                    if (!row || !row[nameColIndex]) continue;
 
-                    const fio = String(row[1]).toLowerCase();
+                    const fio = String(row[nameColIndex]).toLowerCase();
                     if (fio.includes(currentFilter)) {
                         const days = [];
                         for (let j = 0; j < numDays; j++) {
-                            const colIndex = 2 + j * 3;
+                            const colIndex = startColIndex + j * 3;
                             const start = row[colIndex] || '';
                             const end = row[colIndex + 1] || '';
                             const hours = row[colIndex + 2] || '';
                             days.push({ start, end, hours });
                         }
                         employee = {
-                            fio: row[1],
+                            fio: row[nameColIndex],
                             days: days
                         };
                         break;
